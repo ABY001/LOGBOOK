@@ -64,7 +64,8 @@
           <a-button
             block
             class="logout__style"
-            @click="logAdmin()"
+            @click="logOut()"
+            :loading="loadingLog"
             v-if="showLogout"
           >
             <span class="logout"> Log out</span>
@@ -111,7 +112,8 @@ export default {
       icon2,
       icon3,
       icon4,
-      showLogout: true
+      showLogout: true,
+      loadingLog: false
     };
   },
   computed: {
@@ -130,7 +132,49 @@ export default {
     gotoPage(route) {
       this.$router.replace(route);
     },
-    logAdmin() {}
+    async logOut() {
+      this.loadingLog = true;
+      await this.$axios
+        .post(`/api/v1/supervisors/logout`)
+        .then(res => {
+          const { data } = res;
+          this.loadingLog = false;
+          console.log("payload", data);
+          if (data.status == "OK") {
+            this.$store.commit("login/setLogin", "");
+            this.$notification.success({
+              message: "Success",
+              description: data.message
+            });
+            this.$router.replace(`/login`);
+          } else if (data.status == "ERROR") {
+            this.authFailed = true;
+            // this.$store.commit("admin/setAdmin", null, false);
+            this.$notification.error({
+              message: "Error",
+              description: data.message
+            });
+            return;
+          }
+        })
+        .catch(err => {
+          this.loadingLog = false;
+          const { response } = err;
+          if (response.data.message == "Authorization Denied/Invalid Token") {
+            this.$notification.error({
+              message: "Error",
+              description: "You need to log in first"
+            });
+            // this.$router.replace(`/login`);
+          } else
+            this.$notification.error({
+              message: "Error",
+              description: response.data.message || "Network Error"
+            });
+
+          // this.$store.commit("admin/setAdmin", null, false);
+        });
+    }
   }
 };
 </script>

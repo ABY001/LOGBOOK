@@ -220,7 +220,7 @@
                           class="button__style"
                           @click="login()"
                         >
-                          <span class="register"> Sign in</span>
+                          <span class="register"> Sign in {{ signIn }}</span>
                         </a-button>
                       </a-row>
                     </a-form></a-row
@@ -265,7 +265,8 @@ export default {
       loading: false,
       registerIsVisible: false,
       isStudent: false,
-      enableField: false
+      enableField: false,
+      signIn: ""
     };
   },
   methods: {
@@ -279,10 +280,12 @@ export default {
     supBtn() {
       this.isStudent = false;
       this.enableField = true;
+      this.signIn = "as supervisor";
     },
     stud() {
       this.isStudent = true;
       this.enableField = true;
+      this.signIn = "as student";
     },
     async processSupervisor() {
       this.loading = true;
