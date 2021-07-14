@@ -184,7 +184,17 @@
           timeTransform(text)
         }}</span>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="eye" @click="onView(record)" />
+         <a-tooltip placement="bottom">
+          <template slot="title">
+            <span>Click to view more details</span>
+          </template>
+        <span style="margin:3px 0">  <a-icon type="eye" @click="onView(record)" /></span>
+        </a-tooltip>
+    
+     <a-tooltip placement="bottom">
+          <template slot="title">
+            <span>Click to delete this record</span>
+          </template>   <span style="margin:3px 0">  <a-icon type="delete" @click="onDelete(record)" /></span></a-tooltip>
         </template> </a-table
     ></a-row>
   </div>
@@ -285,6 +295,52 @@ export default {
       this.companyName = record.companyName;
       this.isViewMode = true;
       this.IsVisible = true;
+    },
+      async onDelete(record) {
+      try {
+          this.$axios
+          .delete(`/api/v1/users/${record._id}`, {
+            headers: {
+              "x-supervisor-token": this.token
+            }
+          })
+          .then(res => {
+            const { data } = res;
+            if (data.status == "OK") {
+              this.$notification.success({
+                message: "Success",
+                description: data.message
+              });
+              this.loading = false;
+              this.IsVisible = false;
+              this.getUsers();
+            } else {
+              // this.$store.commit("meal/setMeal", null, false);
+              this.$notification.error({
+                message: "Error",
+                description: data.message
+              });
+            }
+          })
+          .catch(err => {
+            this.loading = false;
+            const { response } = err;
+            if (response.data.message == "Authorization Denied/Invalid Token") {
+              this.$notification.error({
+                message: "Error",
+                description: "You need to log in first"
+              });
+              this.$router.replace(`/login`);
+            } else {
+              this.$notification.error({
+                message: "Error",
+                description: response.data.message || "Network Error"
+              });
+            }
+          });
+      } catch (ex) {
+        console.log(ex);
+      }
     },
     onCloseDrawer() {
       const $this = this;
