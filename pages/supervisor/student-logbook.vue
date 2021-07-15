@@ -41,7 +41,8 @@
       <a-form-model
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
-        style="margin:2px 20px"
+        :offset="2"
+        style="margin:10px auto"
       >
         <a-form-model-item label="Fullname">
           <a-input size="large" disabled v-model="singleStudent.fullname" />
@@ -68,6 +69,7 @@
           <a-input size="large" disabled v-model="startDate" />
         </a-form-model-item>
         <a-form-model-item label="Student's available weeks">
+          <!-- <span v-if="(singleStudent.logbook = 0)">nil</span> -->
           <br />
           <a-row v-for="(log, index) in singleStudent.logbook" :key="index">
             <a-form-model-item :label="`Week ${++index}`"
@@ -112,7 +114,7 @@ export default {
       user,
       approved,
       pending,
-      labelCol: { span: 8 },
+      labelCol: { span: 6 },
       wrapperCol: { span: 16 },
       singleStudent: {},
       isVisible: false,

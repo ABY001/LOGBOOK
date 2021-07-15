@@ -302,4 +302,7 @@ button.search-btn.ant-btn {
   color: #15aad9;
   font-size: 26px;
 }
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+  background-color: #e6f7ff45;
+}
 </style>

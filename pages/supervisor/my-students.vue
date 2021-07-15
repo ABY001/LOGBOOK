@@ -9,7 +9,11 @@
     </a-row>
 
     <a-drawer
-      :title="`${isViewMode ? 'View' : 'Create'}   Student Account`"
+      :title="
+        `${
+          isViewMode ? 'View' : isCreateMode ? 'Create' : 'Edit'
+        }   Student Account`
+      "
       :width="windowWidth >= 576 ? '75%' : '90%'"
       :visible="IsVisible"
       :body-style="{ paddingBottom: '80px' }"
@@ -32,57 +36,18 @@
               <a-input
                 size="large"
                 v-model="email"
-                :disabled="isViewMode"
+                :disabled="isViewMode || isEditMode"
                 :rules="[v => !!v || 'Please enter meal cost']"
               />
             </a-form-item> </a-col
         ></a-row>
 
         <a-row :gutter="16">
-          <a-col :span="12" v-if="!isViewMode">
-            <a-form-item label="Password">
-              <a-input-password
-                size="large"
-                v-model="password"
-                :rules="[
-                  v => !!v || 'Password is required',
-                  v =>
-                    (!!v && v.length >= 8) ||
-                    'Password must be more than 8 characters'
-                ]"
-              >
-              </a-input-password></a-form-item
-          ></a-col>
-
-          <a-col :span="12" v-if="isViewMode">
-            <a-form-item label="No. of logbook filled">
-              <a-input
-                size="large"
-                v-model="logbook"
-                disabled
-                :rules="[v => !!v || 'Please enter meal cost']"
-              />
-            </a-form-item>
-          </a-col>
-
-          <a-col :span="12">
-            <a-form-item label="Start date">
-              <a-date-picker
-                size="large"
-                :disabled="isViewMode"
-                style="width: 100%"
-                v-model="startDate"
-                :rules="[v => !!v || 'Please enter student start date']"
-            /></a-form-item>
-          </a-col>
-        </a-row>
-
-        <a-row :gutter="16">
           <a-col :span="12">
             <a-form-item label="Gender">
               <a-select
                 size="large"
-                :disabled="isViewMode"
+                :disabled="isViewMode || isEditMode"
                 v-model="gender"
                 :rules="[v => !!v || 'Please enter your gender']"
               >
@@ -120,7 +85,7 @@
             <a-form-item label="Position">
               <a-input
                 size="large"
-                :disabled="isViewMode"
+                :disabled="isViewMode || isEditMode"
                 v-model="position"
                 :rules="[v => !!v || 'Please enter position']"
               />
@@ -148,6 +113,45 @@
               />
             </a-form-item> </a-col
         ></a-row>
+
+        <a-row :gutter="16">
+          <a-col :span="12" v-if="isCreateMode">
+            <a-form-item label="Password">
+              <a-input-password
+                size="large"
+                v-model="password"
+                :rules="[
+                  v => !!v || 'Password is required',
+                  v =>
+                    (!!v && v.length >= 8) ||
+                    'Password must be more than 8 characters'
+                ]"
+              >
+              </a-input-password></a-form-item
+          ></a-col>
+
+          <a-col :span="12" v-if="isViewMode">
+            <a-form-item label="No. of logbook filled">
+              <a-input
+                size="large"
+                v-model="logbook"
+                disabled
+                :rules="[v => !!v || 'Please enter meal cost']"
+              />
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="12">
+            <a-form-item label="Start date">
+              <a-date-picker
+                size="large"
+                :disabled="isViewMode || isEditMode"
+                style="width: 100%"
+                v-model="startDate"
+                :rules="[v => !!v || 'Please enter student start date']"
+            /></a-form-item>
+          </a-col>
+        </a-row>
       </a-form>
       <div
         v-if="!isViewMode"
@@ -170,7 +174,7 @@
           block
           class="update__style"
           :loading="loading"
-          @click="submit"
+          @click="isCreateMode ? submit() : updateProfile()"
         >
           <span class="update-btn"> Submit</span>
         </a-button>
@@ -195,10 +199,25 @@
 
           <a-tooltip placement="bottom">
             <template slot="title">
+              <span>Click to edit this record</span>
+            </template>
+            <span style="margin:3px 0">
+              <a-icon type="edit" style="color:#15aad9" @click="onEdit(record)"
+            /></span>
+          </a-tooltip>
+
+          <a-tooltip placement="bottom">
+            <template slot="title">
               <span>Click to delete this record</span>
             </template>
             <span style="margin:3px 0">
-              <a-icon type="delete" @click="onDelete(record)"/></span
+              <a-popconfirm
+                title="Sure to delete?"
+                @confirm="() => onDelete(record)"
+              >
+                <a-icon
+                  type="delete"
+                  style="color:#c22429"/></a-popconfirm></span
           ></a-tooltip>
         </template> </a-table
     ></a-row>
@@ -253,6 +272,8 @@ export default {
       columns,
       users: [],
       isViewMode: false,
+      isEditMode: false,
+      isCreateMode: false,
       IsVisible: false,
       loading: false,
       fullname: "",
@@ -265,6 +286,7 @@ export default {
       position: "Intern",
       department: "",
       phonenumber: "",
+      editId: "",
       logbook: null
     };
   },
@@ -298,8 +320,70 @@ export default {
       this.matricNumber = record.matricNumber;
       this.gender = record.gender;
       this.companyName = record.companyName;
+      this.isEditMode = false;
+      this.isCreateMode = false;
       this.isViewMode = true;
       this.IsVisible = true;
+    },
+    onEdit(record) {
+      this.editId = record._id;
+      this.fullname = record.fullname;
+      this.department = record.department;
+      this.email = record.email;
+      this.logbook = record.logbook.length;
+      this.startDate = record.startDate;
+      this.phonenumber = record.phonenumber;
+      this.matricNumber = record.matricNumber;
+      this.gender = record.gender;
+      this.companyName = record.companyName;
+      this.isEditMode = true;
+      this.isCreateMode = false;
+      this.isViewMode = false;
+      this.IsVisible = true;
+    },
+
+    async updateProfile() {
+      this.loading = true;
+      this.$axios
+        .put(
+          `/api/v1/users/update/profile/${this.editId}`,
+          {
+            fullname: this.fullname,
+            companyName: this.companyName,
+            matricNumber: this.matricNumber,
+            department: this.department,
+            phonenumber: this.phonenumber
+          },
+          {
+            headers: {
+              "x-supervisor-token": this.token
+            }
+          }
+        )
+        .then(res => {
+          const { data } = res;
+          if (data.status == "OK") {
+            this.$notification.success({
+              message: "Success",
+              description: data.message
+            });
+            this.loading = false;
+            this.IsVisible = false;
+            this.getUsers();
+          } else {
+            this.$notification.error({
+              message: "Error",
+              description: data.message
+            });
+          }
+        })
+        .catch(err => {
+          const { response } = err;
+          this.$notification.error({
+            message: "Error",
+            description: response.data.message || "Network Error"
+          });
+        });
     },
     async onDelete(record) {
       try {
@@ -370,6 +454,8 @@ export default {
       this.companyName = "";
       this.gender = undefined;
       this.isViewMode = false;
+      this.isEditMode = false;
+      this.isCreateMode = true;
       this.IsVisible = true;
     },
 
@@ -418,64 +504,65 @@ export default {
         });
     },
     async submit() {
-      try {
-        this.loading = true;
-        const whole = {
-          fullname: this.fullname,
-          email: this.email,
-          password: this.password,
-          gender: this.gender,
-          startDate: this.startDate,
-          matricNumber: this.matricNumber,
-          companyName: this.companyName,
-          position: this.position,
-          department: this.department,
-          phonenumber: this.phonenumber
-        };
-        this.$axios
-          .post(`/api/v1/users`, whole, {
-            headers: {
-              "x-supervisor-token": this.token
-            }
-          })
-          .then(res => {
-            const { data } = res;
-            if (data.status == "OK") {
-              // this.$store.commit("meal/setMeal", data.payload);
-              this.$notification.success({
-                message: "Success",
-                description: data.message
-              });
-              this.loading = false;
-              this.IsVisible = false;
-              this.getUsers();
-            } else {
-              // this.$store.commit("meal/setMeal", null, false);
-              this.$notification.error({
-                message: "Error",
-                description: data.message
-              });
-            }
-          })
-          .catch(err => {
-            this.loading = false;
-            const { response } = err;
-            if (response.data.message == "Authorization Denied/Invalid Token") {
-              this.$notification.error({
-                message: "Error",
-                description: "You need to log in first"
-              });
-              this.$router.replace(`/login`);
-            } else {
-              this.$notification.error({
-                message: "Error",
-                description: response.data.message || "Network Error"
-              });
-            }
-          });
-      } catch (ex) {
-        console.log(ex);
-      }
+      console.log("submitting::::::::::::::");
+      // try {
+      //   this.loading = true;
+      //   const whole = {
+      //     fullname: this.fullname,
+      //     email: this.email,
+      //     password: this.password,
+      //     gender: this.gender,
+      //     startDate: this.startDate,
+      //     matricNumber: this.matricNumber,
+      //     companyName: this.companyName,
+      //     position: this.position,
+      //     department: this.department,
+      //     phonenumber: this.phonenumber
+      //   };
+      //   this.$axios
+      //     .post(`/api/v1/users`, whole, {
+      //       headers: {
+      //         "x-supervisor-token": this.token
+      //       }
+      //     })
+      //     .then(res => {
+      //       const { data } = res;
+      //       if (data.status == "OK") {
+      //         // this.$store.commit("meal/setMeal", data.payload);
+      //         this.$notification.success({
+      //           message: "Success",
+      //           description: data.message
+      //         });
+      //         this.loading = false;
+      //         this.IsVisible = false;
+      //         this.getUsers();
+      //       } else {
+      //         // this.$store.commit("meal/setMeal", null, false);
+      //         this.$notification.error({
+      //           message: "Error",
+      //           description: data.message
+      //         });
+      //       }
+      //     })
+      //     .catch(err => {
+      //       this.loading = false;
+      //       const { response } = err;
+      //       if (response.data.message == "Authorization Denied/Invalid Token") {
+      //         this.$notification.error({
+      //           message: "Error",
+      //           description: "You need to log in first"
+      //         });
+      //         this.$router.replace(`/login`);
+      //       } else {
+      //         this.$notification.error({
+      //           message: "Error",
+      //           description: response.data.message || "Network Error"
+      //         });
+      //       }
+      //     });
+      // } catch (ex) {
+      //   console.log(ex);
+      // }
     }
   },
   mounted() {
@@ -524,5 +611,10 @@ tbody.ant-table-tbody {
 .cancel-btn {
   font-size: 14px;
   line-height: 21px;
+}
+.ant-btn-primary {
+  color: #fff;
+  background-color: #15aad9;
+  border-color: #15aad9;
 }
 </style>
