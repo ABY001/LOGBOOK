@@ -29,11 +29,25 @@
           </a-row>
           <a-row type="flex" justify="center" class="usertype">
             <span style="margin:0 10px"> User Name: </span>
-            <span class="username">{{ userDetails.email }}</span>
+            <a-tooltip placement="bottom">
+              <template slot="title">
+                <span>{{ userDetails.email }}</span>
+              </template>
+              <span class="username truncate">{{
+                userDetails.email
+              }}</span></a-tooltip
+            >
           </a-row>
           <a-row type="flex" justify="center" class="usertype">
             <span style="margin:0 10px"> Matric Number: </span>
-            <span class="username">{{ det.matricNumber }}</span>
+            <a-tooltip placement="bottom">
+              <template slot="title">
+                <span>{{ det.matricNumber }}</span>
+              </template>
+              <span class="username truncate">{{
+                det.matricNumber
+              }}</span></a-tooltip
+            >
           </a-row>
         </div>
       </div>
@@ -270,15 +284,12 @@ button.search-btn.ant-btn {
   box-sizing: border-box;
   filter: drop-shadow(0px 4px 96px #e6e8ec);
 }
-/* .ant-btn:active,
-.ant-btn.active,
-.ant-btn:hover,
-.ant-btn:focus {
-  color: rgba(21, 170, 217, 0.46);
-  border: 2px solid rgba(21, 170, 217, 0.46);
-  box-sizing: border-box;
-  filter: drop-shadow(0px 4px 96px #e6e8ec);
-} */
+.truncate {
+  white-space: nowrap;
+  max-width: 125px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .ant-layout-sider-zero-width-trigger {
   background: linear-gradient(269.08deg, #afffff 18.44%, #15aad9 72.16%);
 }

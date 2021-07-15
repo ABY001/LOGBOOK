@@ -168,12 +168,12 @@
                   <a-row style="margin-top:20px">
                     <a-col :span="12">
                       <a-button block class="sign-in__style" @click="supBtn">
-                        <span class="sign-in"> A SUPERVISOR</span>
+                        <span class="sign-in"> SUPERVISOR</span>
                       </a-button></a-col
                     >
                     <a-col :span="12">
                       <a-button block class="sign-in__style" @click="stud">
-                        <span class="sign-in"> A STUDENT</span>
+                        <span class="sign-in"> STUDENT</span>
                       </a-button></a-col
                     ></a-row
                   >

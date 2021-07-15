@@ -210,7 +210,7 @@ export default {
           const { data } = res;
           if (data.status == "OK") {
             this.users = data.payload;
-            this.$store.commit("user/setUser", this.users);
+            this.$store.commit("logUser/setUser", this.users);
           } else if (data.status == "ERROR") {
             this.$notification.error({
               message: "Error",

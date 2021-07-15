@@ -184,17 +184,22 @@
           timeTransform(text)
         }}</span>
         <template slot="operation" slot-scope="text, record">
-         <a-tooltip placement="bottom">
-          <template slot="title">
-            <span>Click to view more details</span>
-          </template>
-        <span style="margin:3px 0">  <a-icon type="eye" @click="onView(record)" /></span>
-        </a-tooltip>
-    
-     <a-tooltip placement="bottom">
-          <template slot="title">
-            <span>Click to delete this record</span>
-          </template>   <span style="margin:3px 0">  <a-icon type="delete" @click="onDelete(record)" /></span></a-tooltip>
+          <a-tooltip placement="bottom">
+            <template slot="title">
+              <span>Click to view more details</span>
+            </template>
+            <span style="margin:3px 0">
+              <a-icon type="eye" @click="onView(record)"
+            /></span>
+          </a-tooltip>
+
+          <a-tooltip placement="bottom">
+            <template slot="title">
+              <span>Click to delete this record</span>
+            </template>
+            <span style="margin:3px 0">
+              <a-icon type="delete" @click="onDelete(record)"/></span
+          ></a-tooltip>
         </template> </a-table
     ></a-row>
   </div>
@@ -296,9 +301,9 @@ export default {
       this.isViewMode = true;
       this.IsVisible = true;
     },
-      async onDelete(record) {
+    async onDelete(record) {
       try {
-          this.$axios
+        this.$axios
           .delete(`/api/v1/users/${record._id}`, {
             headers: {
               "x-supervisor-token": this.token
@@ -387,7 +392,7 @@ export default {
           const { data } = res;
           if (data.status == "OK") {
             this.users = data.payload;
-            this.$store.commit("user/setUser", this.users);
+            this.$store.commit("logUser/setUser", this.users);
             this.$notification.success({
               message: "Success",
               description: data.message
