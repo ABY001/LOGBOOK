@@ -34,78 +34,66 @@
 
     <a-row type="flex" justify="center">
       <a-card>
-        <a-card-grid style="width:15%;text-align:center" :hoverable="false">
+        <a-card-grid style="width:20%;text-align:center" :hoverable="false">
           <span class="card-heading "> DAYS</span>
         </a-card-grid>
-        <a-card-grid style="width:85%;text-align:center" :hoverable="false">
+        <a-card-grid style="width:80%;text-align:center" :hoverable="false">
           <span class="card-heading "> NATURE OF WORK</span>
         </a-card-grid>
 
-        <a-card-grid style="width:15%;text-align:center" :hoverable="false">
+        <a-card-grid style="width:20%;text-align:center" :hoverable="false">
           <span class="days"> MONDAY</span>
         </a-card-grid>
         <a-card-grid
-          style="width:85%;text-align:center"
+          style="width:80%;text-align:center"
           class="activity"
           :hoverable="false"
         >
-          <a-input class="activity_input" v-model="monday" :disabled="monday" />
+          <a-input class="activity_input" v-model="monday" />
         </a-card-grid>
 
-        <a-card-grid style="width:15%;text-align:center" :hoverable="false">
+        <a-card-grid style="width:20%;text-align:center" :hoverable="false">
           <span class="days"> TUESDAY</span>
         </a-card-grid>
         <a-card-grid
-          style="width:85%;text-align:center"
+          style="width:80%;text-align:center"
           class="activity"
           :hoverable="false"
         >
-          <a-input
-            class="activity_input"
-            v-model="tuesday"
-            :disabled="tuesday"
-          />
+          <a-input class="activity_input" v-model="tuesday" />
         </a-card-grid>
 
-        <a-card-grid style="width:15%;text-align:center" :hoverable="false">
+        <a-card-grid style="width:20%;text-align:center" :hoverable="false">
           <span class="days"> WEDNESDAY</span>
         </a-card-grid>
         <a-card-grid
-          style="width:85%;text-align:center"
+          style="width:80%;text-align:center"
           class="activity"
           :hoverable="false"
         >
-          <a-input
-            class="activity_input"
-            v-model="wednesday"
-            :disabled="wednesday"
-          />
+          <a-input class="activity_input" v-model="wednesday" />
         </a-card-grid>
 
-        <a-card-grid style="width:15%;text-align:center" :hoverable="false">
+        <a-card-grid style="width:20%;text-align:center" :hoverable="false">
           <span class="days"> THURSDAY</span>
         </a-card-grid>
         <a-card-grid
-          style="width:85%;text-align:center"
+          style="width:80%;text-align:center"
           class="activity"
           :hoverable="false"
         >
-          <a-input
-            class="activity_input"
-            v-model="thursday"
-            :disabled="thursday"
-          />
+          <a-input class="activity_input" v-model="thursday" />
         </a-card-grid>
 
-        <a-card-grid style="width:15%;text-align:center" :hoverable="false">
+        <a-card-grid style="width:20%;text-align:center" :hoverable="false">
           <span class="days">FRIDAY</span>
         </a-card-grid>
         <a-card-grid
-          style="width:85%;text-align:center"
+          style="width:80%;text-align:center"
           class="activity"
           :hoverable="false"
         >
-          <a-input class="activity_input" v-model="friday" :disabled="friday" />
+          <a-input class="activity_input" v-model="friday" />
         </a-card-grid>
       </a-card>
     </a-row>

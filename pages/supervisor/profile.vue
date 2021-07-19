@@ -1,17 +1,40 @@
 <template>
   <div class="card_container">
-    <a-card :bordered="false" class="profile_card">
-      <a-row type="flex" justify="center" style="margin: 30px auto">
-        <a-card hoverable style="max-width: 400px; min-width:240px">
-          <img slot="cover" alt="user" :src="user"/></a-card
-      ></a-row>
+    <a-card :bordered="false" class="profile_card" style="height:100%">
+      <a-row type="flex" justify="center"  style="margin: 30px auto">
+        <!-- <a-card hoverable style="max-width: 400px; min-width:240px">
+          <img slot="cover" alt="user" :src="user" />
+        </a-card> -->
+
+        <a-upload
+          name="avatar"
+          list-type="picture-card"
+          class="avatar-uploader"
+          :show-upload-list="false"
+          :before-upload="beforeUpload"
+          @change="handleChange"
+        >
+          <img
+            v-if="imageUrl"
+            :src="imageUrl"
+            alt="avatar"
+            style="width:100%"
+          />
+          <div v-else>
+            <a-icon :type="loading ? 'loading' : 'plus'" />
+            <div class="ant-upload-text">
+              Upload
+            </div>
+          </div>
+        </a-upload>
+      </a-row>
 
       <a-row type="flex" justify="center">
         <a-card :border="false" class="profile-details">
           <a-form-model
             :label-col="labelCol"
             :wrapper-col="wrapperCol"
-            style="margin:2px 20px"
+            style="margin:10px 20px"
           >
             <a-form-model-item label="Full name">
               <a-input size="large" v-model="name" />
@@ -67,6 +90,8 @@ export default {
   layout: "supAuthPage",
   data() {
     return {
+      loading: false,
+      imageUrl: "",
       user,
       loading: false,
       labelCol: { span: 8 },
@@ -84,9 +109,90 @@ export default {
   computed: {
     token() {
       return this.$store.state.login.login.token;
+    },
+    id() {
+      return this.$store.state.login.login.id;
     }
   },
   methods: {
+    handleChange(info) {
+      if (info.file.status === "uploading") {
+        this.loading = true;
+        return;
+      }
+      if (info.file.status === "done") {
+        console.log("done", info);
+        // Get this url from response in real world.
+        this.getBase64(info.file.originFileObj, imageUrl => {
+          this.imageUrl = imageUrl;
+          this.loading = false;
+        });
+      }
+    },
+    getBase64(img, callback) {
+      console.log("in getb", img);
+      const reader = new FileReader();
+      reader.addEventListener("load", () => callback(reader.result));
+      reader.readAsDataURL(img);
+      this.uploadImg(img);
+    },
+    uploadImg(img) {
+      console.log("in upld", img);
+      this.$axios
+        .put(`/api/v1/supervisors/upload/${this.id}/profile-image`, {
+          headers: {
+            "x-supervisor-token": this.token,
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          data: img
+        })
+        .then(res => {
+          const { data } = res;
+          if (data.status == "OK") {
+            console.log("sup", data.payload);
+            this.$notification.success({
+              message: "Success",
+              description: data.message
+            });
+          } else if (data.status == "ERROR") {
+            this.$notification.error({
+              message: "Error",
+              description: data.message
+            });
+            return;
+          }
+        })
+        .catch(err => {
+          this.loading = false;
+          const { response } = err;
+          if (response.data.message == "Authorization Denied/Invalid Token") {
+            this.$notification.error({
+              message: "Error",
+              description: "You need to log in first"
+            });
+            this.$router.push(`/login`);
+          } else {
+            this.$notification.error({
+              message: "Error",
+              description: response.data.message || "Network Error"
+            });
+          }
+        });
+    },
+
+    beforeUpload(file) {
+      const isJpgOrPng =
+        file.type === "image/jpeg" || file.type === "image/png";
+      if (!isJpgOrPng) {
+        this.$message.error("You can only upload JPG file!");
+      }
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        this.$message.error("Image must smaller than 2MB!");
+      }
+      return isJpgOrPng && isLt2M;
+    },
+
     getProfileDetails() {
       this.$axios
         .get("/api/v1/supervisors/profile", {
@@ -186,6 +292,20 @@ export default {
 </script>
 
 <style>
+.avatar-uploader > .ant-upload {
+  width: 128px;
+  height: 128px;
+}
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
+
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
+}
+
 .profile_card {
   background: #ffffff;
   border: 1px solid #ffffff;

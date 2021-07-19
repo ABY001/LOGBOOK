@@ -128,7 +128,7 @@ export default {
       return this.$store.state.login.login.token;
     },
     users() {
-      return this.$store.state.user.user;
+      return this.$store.state.logUser.user;
     },
     id() {
       return this.$store.state.login.login.id;

@@ -1,17 +1,39 @@
 <template>
   <div class="card_container">
-    <a-card :bordered="false" class="profile_card">
+    <a-card :bordered="false" class="profile_card" style="height:100%">
       <a-row type="flex" justify="center" style="margin: 30px auto">
-        <a-card hoverable style="max-width: 400px; min-width:240px">
+        <!-- <a-card hoverable style="max-width: 400px; min-width:240px">
           <img slot="cover" alt="user" :src="user"/></a-card
-      ></a-row>
+      > -->
+        <a-upload
+          name="avatar"
+          list-type="picture-card"
+          class="avatar-uploader"
+          :show-upload-list="false"
+          :before-upload="beforeUpload"
+          @change="handleChange"
+        >
+          <img
+            v-if="imageUrl"
+            :src="imageUrl"
+            alt="avatar"
+            style="width:100%"
+          />
+          <div v-else>
+            <a-icon :type="loading ? 'loading' : 'plus'" />
+            <div class="ant-upload-text">
+              Upload
+            </div>
+          </div>
+        </a-upload>
+      </a-row>
 
       <a-row type="flex" justify="center">
         <a-card :border="false" class="profile-details">
           <a-form-model
             :label-col="labelCol"
             :wrapper-col="wrapperCol"
-            style="margin:2px 20px"
+            style="margin:10px 20px"
           >
             <a-form-model-item label="Full name">
               <a-input size="large" v-model="name" />
@@ -72,15 +94,103 @@ export default {
       companyname: "",
       matricNumber: "",
       department: "",
-      gender: undefined
+      gender: undefined,
+      imageUrl: ""
     };
   },
   computed: {
     token() {
       return this.$store.state.login.login.token;
+    },
+    id() {
+      return this.$store.state.studentDetails.user._id;
     }
   },
   methods: {
+    handleChange(info) {
+      if (info.file.status === "uploading") {
+        this.loading = true;
+        return;
+      }
+      if (info.file.status === "done") {
+        // Get this url from response in real world.
+        var file = info.file.originFileObj;
+        var formData = new FormData();
+        console.log("in getbza", file);
+        formData.append("file", info.file.originFileObj);
+        console.log("in getaz", formData);
+        this.uploadImg(formData);
+
+        // this.getBase64(info.file.originFileObj, imageUrl => {
+        //   this.imageUrl = imageUrl;
+        //   this.loading = false;
+        // });
+      }
+    },
+    handleChanges(info) {
+      if (info.file.status === "uploading") {
+        this.loading = true;
+        return;
+      }
+      if (info.file.status === "done") {
+        console.log("done", info);
+        // Get this url from response in real world.
+        this.getBase64(info.file.originFileObj, imageUrl => {
+          this.imageUrl = imageUrl;
+          this.loading = false;
+        });
+      }
+    },
+    getBase64(img, callback) {
+      console.log("in getb", img);
+      const reader = new FileReader();
+      reader.addEventListener("load", () => callback(reader.result));
+      reader.readAsDataURL(img);
+      this.uploadImg(img);
+    },
+    uploadImg(img) {
+      console.log("in upld", img);
+      this.$axios
+        .put(`/api/v1/users/upload/${this.id}/profile-image`, {
+          headers: {
+            "x-access-token": this.token,
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          data: img
+        })
+        .then(res => {
+          const { data } = res;
+          if (data.status == "OK") {
+            console.log("sup", data.payload);
+            this.$notification.success({
+              message: "Success",
+              description: data.message
+            });
+          } else if (data.status == "ERROR") {
+            this.$notification.error({
+              message: "Error",
+              description: data.message
+            });
+            return;
+          }
+        })
+        .catch(err => {
+          this.loading = false;
+          const { response } = err;
+          if (response.data.message == "Authorization Denied/Invalid Token") {
+            this.$notification.error({
+              message: "Error",
+              description: "You need to log in first"
+            });
+            this.$router.push(`/login`);
+          } else {
+            this.$notification.error({
+              message: "Error",
+              description: response.data.message || "Network Error"
+            });
+          }
+        });
+    },
     async getProfileDetails() {
       this.$axios
         .get("/api/v1/users/profile", {
