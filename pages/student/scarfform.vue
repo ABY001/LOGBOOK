@@ -17,7 +17,12 @@
       </a-upload-dragger></a-row
     >
     <a-row type="flex" justify="end">
-      <a-button block class="upload__style" @click="UploadForm()">
+      <a-button
+        block
+        class="upload__style"
+        @click="uploadImg(img)"
+        :loading="loading"
+      >
         <span class="upload-btn"> Upload</span>
       </a-button>
     </a-row>
@@ -27,7 +32,7 @@
 export default {
   layout: "studAuthPage",
   data() {
-    return {};
+    return { img: "", loading: false };
   },
   computed: {
     token() {
@@ -39,17 +44,62 @@ export default {
   },
   methods: {
     handleChange(info) {
-      const status = info.file.status;
-      if (status !== "uploading") {
-        console.log(info.file, info.fileList);
+      if (info.file.status === "uploading") {
+        return;
       }
-      if (status === "done") {
-        this.$message.success(`${info.file.name} file uploaded successfully.`);
-      } else if (status === "error") {
-        this.$message.error(`${info.file.name} file upload failed.`);
+      if (info.file.status === "done") {
+        // Get this url from response in real world.
+        var file = info.file.originFileObj;
+        var formData = new FormData();
+        formData.append("image", file);
+        this.img = formData;
       }
     },
-    UploadForm() {}
+
+    uploadImg(img) {
+      this.loading = true;
+      this.$axios
+        .put(`/api/v1/users/upload/${this.id}/image`, img, {
+          headers: {
+            "x-access-token": this.token,
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
+        })
+
+        .then(res => {
+          const { data } = res;
+          if (data.status == "OK") {
+            this.$notification.success({
+              message: "Success",
+              description: data.message
+            });
+            this.img = "";
+          } else if (data.status == "ERROR") {
+            this.$notification.error({
+              message: "Error",
+              description: data.message
+            });
+            return;
+          }
+        })
+        .catch(err => {
+          this.loading = false;
+          const { response } = err;
+          if (response.data.message == "Authorization Denied/Invalid Token") {
+            this.$notification.error({
+              message: "Error",
+              description: "You need to log in first"
+            });
+            this.$router.push(`/login`);
+          } else {
+            this.$notification.error({
+              message: "Error",
+              description: response.data.message || "Network Error"
+            });
+          }
+        });
+      this.loading = false;
+    }
   }
 };
 </script>

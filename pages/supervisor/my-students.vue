@@ -196,7 +196,7 @@
               <a-icon type="eye" @click="onView(record)"
             /></span>
           </a-tooltip>
-
+|
           <a-tooltip placement="bottom">
             <template slot="title">
               <span>Click to edit this record</span>
@@ -205,7 +205,7 @@
               <a-icon type="edit" style="color:#15aad9" @click="onEdit(record)"
             /></span>
           </a-tooltip>
-
+|
           <a-tooltip placement="bottom">
             <template slot="title">
               <span>Click to delete this record</span>
