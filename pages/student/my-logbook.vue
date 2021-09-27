@@ -10,7 +10,7 @@
           <a-card
             :bordered="false"
             @click="displayDetails(log)"
-            style="padding:5px"
+            style="padding:5px; margin: 10px"
           >
             <a-row type="flex" justify="space-between" style="margin: 15px 0;">
               <div class="week">Week {{ log.weekNumber }}</div>

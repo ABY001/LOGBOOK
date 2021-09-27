@@ -13,9 +13,9 @@
 
         <div class="dp">
           <a-row type="flex" justify="center" style="padding: 50px 3px 20px">
-            <img :src="user" style="margin:0 10px" />
+            <img :src="det.profileImage" style="margin:0 10px; height:60px; width:60px" />
             <span class="userfullname username"
-              >{{ userDetails.fullname }}<br />{{
+              >{{ det.fullname }}<br />{{
                 timeTransform(det.startDate)
               }}</span
             >
@@ -23,22 +23,22 @@
         </div>
 
         <div>
-          <a-row type="flex" justify="center" class="usertype">
+          <a-row type="flex" justify="start" class="usertype">
             <span style="margin:0 10px"> User Type:</span>
             <span class="username">Student</span>
           </a-row>
-          <a-row type="flex" justify="center" class="usertype">
+          <a-row type="flex" justify="start" class="usertype">
             <span style="margin:0 10px"> User Name: </span>
             <a-tooltip placement="bottom">
               <template slot="title">
-                <span>{{ userDetails.email }}</span>
+                <span>{{ det.email }}</span>
               </template>
               <span class="username truncate">{{
-                userDetails.email
+                det.email
               }}</span></a-tooltip
             >
           </a-row>
-          <a-row type="flex" justify="center" class="usertype">
+          <a-row type="flex" justify="start" class="usertype">
             <span style="margin:0 10px"> Matric Number: </span>
             <a-tooltip placement="bottom">
               <template slot="title">
@@ -141,6 +141,9 @@ export default {
     },
     det() {
       return this.$store.state.studentDetails.user;
+    },
+    token() {
+      return this.$store.state.login.login.token;
     }
   },
   methods: {
@@ -160,6 +163,46 @@ export default {
     },
     gotoPage(route) {
       this.$router.replace(route);
+    },
+    async getProfileDetails() {
+      this.$axios
+        .get("/api/v1/users/profile", {
+          headers: {
+            "x-access-token": this.token
+          }
+        })
+        .then(res => {
+          const { data } = res;
+          if (data.status == "OK") {
+            this.$store.commit("studentDetails/setUser", data.payload);
+            // this.$notification.success({
+            //   message: "Success",
+            //   description: data.message
+            // });
+          } else if (data.status == "ERROR") {
+            this.$notification.error({
+              message: "Error",
+              description: data.message
+            });
+            return;
+          }
+        })
+        .catch(err => {
+          this.loading = false;
+          const { response } = err;
+          if (response.data.message == "Authorization Denied/Invalid Token") {
+            this.$notification.error({
+              message: "Error",
+              description: "You need to log in first"
+            });
+            this.$router.push(`/login`);
+          } else {
+            this.$notification.error({
+              message: "Error",
+              description: response.data.message || "Network Error"
+            });
+          }
+        });
     },
     async logOut() {
       this.loadingLog = true;
@@ -204,6 +247,9 @@ export default {
           // this.$store.commit("admin/setAdmin", null, false);
         });
     }
+  },
+  mounted() {
+    this.getProfileDetails();
   }
 };
 </script>
@@ -270,7 +316,7 @@ export default {
   height: 44.16px;
   width: 90px;
   position: absolute;
-  bottom: 4vh;
+  bottom: 1vh;
 }
 .logout {
   font-weight: bold;

@@ -1,33 +1,6 @@
 <template>
   <div class="card_container">
     <a-card :bordered="false" class="profile_card" style="height:100%">
-      <a-row type="flex" justify="center" style="margin: 30px auto">
-        <!-- <a-card hoverable style="max-width: 400px; min-width:240px">
-          <img slot="cover" alt="user" :src="user"/></a-card
-      > -->
-        <a-upload
-          name="avatar"
-          list-type="picture-card"
-          class="avatar-uploader"
-          :show-upload-list="false"
-          :before-upload="beforeUpload"
-          @change="handleChange"
-        >
-          <img
-            v-if="imageUrl"
-            :src="imageUrl"
-            alt="avatar"
-            style="width:100%"
-          />
-          <div v-else>
-            <a-icon :type="loading ? 'loading' : 'plus'" />
-            <div class="ant-upload-text">
-              Upload
-            </div>
-          </div>
-        </a-upload>
-      </a-row>
-
       <a-row type="flex" justify="center">
         <a-card :border="false" class="profile-details">
           <a-form-model
@@ -66,12 +39,42 @@
                 </a-select-option>
               </a-select>
             </a-form-model-item>
+
+            <a-form-model-item label="Profile Image">
+              <!-- <a-row type="flex" justify="center" style="margin: 30px auto"> -->
+              <a-upload
+                name="avatar"
+                list-type="picture-card"
+                class="avatar-uploader"
+                :show-upload-list="false"
+                :before-upload="beforeUpload"
+                @change="handleChange"
+              >
+                <img
+                  v-if="imageUrl"
+                  :src="imageUrl"
+                  alt="user"
+                  style="width:100%"
+                />
+                <div v-else>
+                  <a-icon :type="loading ? 'loading' : 'plus'" />
+                  <div class="ant-upload-text">
+                    Upload
+                  </div>
+                </div>
+              </a-upload>
+            </a-form-model-item>
           </a-form-model>
         </a-card>
       </a-row>
     </a-card>
     <a-row type="flex" justify="end">
-      <a-button block class="update__style" @click="updateProfile()">
+      <a-button
+        block
+        class="update__style"
+        @click="updateProfile()"
+        :loading="btnloading"
+      >
         <span class="update-btn"> Update</span>
       </a-button>
     </a-row>
@@ -95,7 +98,9 @@ export default {
       matricNumber: "",
       department: "",
       gender: undefined,
-      imageUrl: ""
+      imageUrl: "",
+      loading: false,
+      btnloading: false
     };
   },
   computed: {
@@ -116,52 +121,23 @@ export default {
         // Get this url from response in real world.
         var file = info.file.originFileObj;
         var formData = new FormData();
-        console.log("in getbza", file);
-        formData.append("file", info.file.originFileObj);
-        console.log("in getaz", formData);
+        formData.append("image", file);
         this.uploadImg(formData);
+      }
+    },
 
-        // this.getBase64(info.file.originFileObj, imageUrl => {
-        //   this.imageUrl = imageUrl;
-        //   this.loading = false;
-        // });
-      }
-    },
-    handleChanges(info) {
-      if (info.file.status === "uploading") {
-        this.loading = true;
-        return;
-      }
-      if (info.file.status === "done") {
-        console.log("done", info);
-        // Get this url from response in real world.
-        this.getBase64(info.file.originFileObj, imageUrl => {
-          this.imageUrl = imageUrl;
-          this.loading = false;
-        });
-      }
-    },
-    getBase64(img, callback) {
-      console.log("in getb", img);
-      const reader = new FileReader();
-      reader.addEventListener("load", () => callback(reader.result));
-      reader.readAsDataURL(img);
-      this.uploadImg(img);
-    },
     uploadImg(img) {
-      console.log("in upld", img);
       this.$axios
-        .put(`/api/v1/users/upload/${this.id}/profile-image`, {
+        .put(`/api/v1/users/upload/${this.id}/profile-image`, img, {
           headers: {
             "x-access-token": this.token,
             "Content-Type": "application/x-www-form-urlencoded"
-          },
-          data: img
+          }
         })
         .then(res => {
           const { data } = res;
           if (data.status == "OK") {
-            console.log("sup", data.payload);
+            this.imageUrl = data.payload;
             this.$notification.success({
               message: "Success",
               description: data.message
@@ -202,6 +178,8 @@ export default {
           const { data } = res;
           if (data.status == "OK") {
             this.data = data.payload;
+            console.log(this.data);
+            this.imageUrl = this.data.profileImage;
             this.name = this.data.fullname;
             this.companyname = this.data.companyName;
             this.matricNumber = this.data.matricNumber;
@@ -240,7 +218,7 @@ export default {
         });
     },
     async updateProfile() {
-      this.loading = true;
+      this.btnloading = true;
       this.$axios
         .put(
           `/api/v1/users/update/profile`,
@@ -265,7 +243,7 @@ export default {
               description: data.message
             });
             this.getProfileDetails();
-            this.loading = false;
+            this.btnloading = false;
           } else {
             this.$notification.error({
               message: "Error",
@@ -280,6 +258,7 @@ export default {
             description: response.data.message || "Network Error"
           });
         });
+      this.btnloading = false;
     }
   },
   mounted() {

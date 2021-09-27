@@ -13,7 +13,10 @@
 
         <div class="dp">
           <a-row type="flex" justify="center" style="padding: 50px 3px 20px">
-            <img :src="user" style="margin:0 10px" />
+            <img
+              :src="supervisor.profileImage"
+              style="margin:0 10px; height:60px; width:60px"
+            />
             <span class="userfullname username">{{ supervisor.fullname }}</span>
           </a-row>
         </div>
@@ -36,9 +39,9 @@
             <span style="margin:0 10px"> User ID: </span>
             <a-tooltip placement="bottom">
               <template slot="title">
-                <span>{{ supervisor.id }}</span>
+                <span>{{ supervisor._id }}</span>
               </template>
-              <span class="username truncate">{{ supervisor.id }}</span>
+              <span class="username truncate">{{ supervisor._id }}</span>
             </a-tooltip></a-row
           >
         </div>
@@ -128,7 +131,7 @@ export default {
   },
   computed: {
     supervisor() {
-      return this.$store.state.login.login;
+      return this.$store.state.supervisorDetails.user;
     }
   },
   methods: {
@@ -141,6 +144,42 @@ export default {
     },
     gotoPage(route) {
       this.$router.replace(route);
+    },
+    getProfileDetails() {
+      this.$axios
+        .get("/api/v1/supervisors/profile", {
+          headers: {
+            "x-supervisor-token": this.token
+          }
+        })
+        .then(res => {
+          const { data } = res;
+          if (data.status == "OK") {
+            this.$store.commit("supervisorDetails/setUser", data.payload);
+          } else if (data.status == "ERROR") {
+            this.$notification.error({
+              message: "Error",
+              description: data.message
+            });
+            return;
+          }
+        })
+        .catch(err => {
+          this.loading = false;
+          const { response } = err;
+          if (response.data.message == "Authorization Denied/Invalid Token") {
+            this.$notification.error({
+              message: "Error",
+              description: "You need to log in first"
+            });
+            this.$router.push(`/login`);
+          } else {
+            this.$notification.error({
+              message: "Error",
+              description: response.data.message || "Network Error"
+            });
+          }
+        });
     },
     async logOut() {
       this.loadingLog = true;
@@ -251,7 +290,7 @@ export default {
   height: 44.16px;
   width: 90px;
   position: absolute;
-  bottom: 4vh;
+  bottom: 1vh;
 }
 .logout {
   font-weight: bold;
