@@ -505,64 +505,64 @@ export default {
     },
     async submit() {
       console.log("submitting::::::::::::::");
-      // try {
-      //   this.loading = true;
-      //   const whole = {
-      //     fullname: this.fullname,
-      //     email: this.email,
-      //     password: this.password,
-      //     gender: this.gender,
-      //     startDate: this.startDate,
-      //     matricNumber: this.matricNumber,
-      //     companyName: this.companyName,
-      //     position: this.position,
-      //     department: this.department,
-      //     phonenumber: this.phonenumber
-      //   };
-      //   this.$axios
-      //     .post(`/api/v1/users`, whole, {
-      //       headers: {
-      //         "x-supervisor-token": this.token
-      //       }
-      //     })
-      //     .then(res => {
-      //       const { data } = res;
-      //       if (data.status == "OK") {
-      //         // this.$store.commit("meal/setMeal", data.payload);
-      //         this.$notification.success({
-      //           message: "Success",
-      //           description: data.message
-      //         });
-      //         this.loading = false;
-      //         this.IsVisible = false;
-      //         this.getUsers();
-      //       } else {
-      //         // this.$store.commit("meal/setMeal", null, false);
-      //         this.$notification.error({
-      //           message: "Error",
-      //           description: data.message
-      //         });
-      //       }
-      //     })
-      //     .catch(err => {
-      //       this.loading = false;
-      //       const { response } = err;
-      //       if (response.data.message == "Authorization Denied/Invalid Token") {
-      //         this.$notification.error({
-      //           message: "Error",
-      //           description: "You need to log in first"
-      //         });
-      //         this.$router.replace(`/login`);
-      //       } else {
-      //         this.$notification.error({
-      //           message: "Error",
-      //           description: response.data.message || "Network Error"
-      //         });
-      //       }
-      //     });
-      // } catch (ex) {
-      //   console.log(ex);
-      // }
+      try {
+        this.loading = true;
+        const whole = {
+          fullname: this.fullname,
+          email: this.email,
+          password: this.password,
+          gender: this.gender,
+          startDate: this.startDate,
+          matricNumber: this.matricNumber,
+          companyName: this.companyName,
+          position: this.position,
+          department: this.department,
+          phonenumber: this.phonenumber
+        };
+        this.$axios
+          .post(`/api/v1/users`, whole, {
+            headers: {
+              "x-supervisor-token": this.token
+            }
+          })
+          .then(res => {
+            const { data } = res;
+            if (data.status == "OK") {
+              // this.$store.commit("meal/setMeal", data.payload);
+              this.$notification.success({
+                message: "Success",
+                description: data.message
+              });
+              this.loading = false;
+              this.IsVisible = false;
+              this.getUsers();
+            } else {
+              // this.$store.commit("meal/setMeal", null, false);
+              this.$notification.error({
+                message: "Error",
+                description: data.message
+              });
+            }
+          })
+          .catch(err => {
+            this.loading = false;
+            const { response } = err;
+            if (response.data.message == "Authorization Denied/Invalid Token") {
+              this.$notification.error({
+                message: "Error",
+                description: "You need to log in first"
+              });
+              this.$router.replace(`/login`);
+            } else {
+              this.$notification.error({
+                message: "Error",
+                description: response.data.message || "Network Error"
+              });
+            }
+          });
+      } catch (ex) {
+        console.log(ex);
+      }
     }
   },
   mounted() {

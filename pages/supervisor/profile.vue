@@ -93,7 +93,6 @@ export default {
       loading: false,
       imageUrl: "",
       user,
-      loading: false,
       labelCol: { span: 8 },
       wrapperCol: { span: 16 },
       name: "",
